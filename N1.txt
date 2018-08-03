@@ -1,0 +1,87 @@
+Training
+
+Topics covered
+
+1.Cancel and Correct Batch(For Non-EQ Products)
+
+Qyery:-
+
+SELECT COUNT(*),
+  PROCESS_STATE_CD,
+  ET.TRANS_ACTIVE_IND,
+  ET.CALC_ELIGIBLE_IND,
+  TR.TRANS_EXCEPTION_IND,
+  ET.TRANS_CHARGE_STATUS
+FROM EXAMIN_TRANSACTION ET,
+  TRANSACTION_REFERENCE TR
+WHERE ET.TRANS_ID              = TR.TRANS_ID
+AND ET.TRANS_VERSION           = TR.TRANS_VERSION
+AND ET.PRODUCT_TYPE_INTRNL_ID IN (101,102,103)
+AND ET.TRADE_DATE BETWEEN '01-DEC-2015' AND '31-DEC-2015'
+and PROCESS_STATE_CD is null
+and  ET.CALC_ELIGIBLE_IND = 'N';
+
+Script:- 
+
+export SCRIPT_NAME=CNC
+./startNewBatch.sh -DbatchName=CncDistributor -DbatchType=Daily -DproductTypes=FX -DstartDate=12/01/2015
+
+For entire month:-
+
+./startNewBatch.sh -DbatchName=CncDistributor -DbatchType=Daily -DproductTypes=FX -DstartDate=12/01/2015 -DendDate=12/31/2015
+
+execute the query for checking the date:-
+
+select * from examin_transaction ; //check the business date it should be same as d current date in the Examin_Business_Date table
+
+
+
+
+2.Enrichment(For Non-EQ Products)
+
+Query:-
+
+SELECT COUNT(*),
+  PROCESS_STATE_CD,
+  ET.TRANS_ACTIVE_IND,
+  ET.CALC_ELIGIBLE_IND,
+  TR.TRANS_EXCEPTION_IND,
+  ET.TRANS_CHARGE_STATUS
+FROM EXAMIN_TRANSACTION ET,
+  TRANSACTION_REFERENCE TR
+WHERE ET.TRANS_ID              = TR.TRANS_ID
+AND ET.TRANS_VERSION           = TR.TRANS_VERSION
+AND ET.PRODUCT_TYPE_INTRNL_ID IN (101,102,103)
+AND ET.TRADE_DATE BETWEEN '01-DEC-2015' AND '31-DEC-2015'
+and PROCESS_STATE_CD is 'CnCed'
+and  ET.CALC_ELIGIBLE_IND = 'Y';
+
+Script:-
+
+
+export SCRIPT_NAME=ENRICHMENT
+./startNewBatch.sh -DbatchName=EnrichEngineMain -DbatchType=Daily -DproductTypes=FX -DstartDate=12/01/2015
+
+3.Batches
+
+3.1 Running total initialization(Pre and Post)
+
+pbrun ssh -l excalibur etracu01.uk.db.com
+
+cd examin/bin/adhoc/
+
+ls -ltr //select Runningtotalinitializer
+
+vi Runningtotalinitializer.sh
+
+./Runningtotalinitializer.sh
+
+select * 
+from Limit_tier_running_total 
+where running_total_id=......... 
+order by run_daymonthyear desc;
+
+Note:-":q!" without save
+
+
+

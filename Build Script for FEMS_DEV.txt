@@ -1,0 +1,60 @@
+Access URLS
+http://192.168.113.106:19211/console/
+http://192.168.113.106:19213/examinWeb/DummyLogin.jsp
+
+
+Build steps …
+
+login to the server  as examindev Hostname : 192.168.113.106
+
+export source_base=/opt/excalibur/prototype
+export lib_dir=/opt/excalibur
+
+--Check out the latest code
+cd /opt/excalibur/prototype/Source/
+svn update
+
+A    java/test/com/cs/examin/dataobject/TestTransactionCalcService.java
+U    java/com/cs/examin/dataobject/trans/ExaminTransactionDAO.java
+A    java/com/cs/examin/dataobject/trans/CalculatroResponse.java
+U    java/com/cs/examin/dataobject/charges/TransactionChargeDAO.java
+A    java/com/cs/examin/service/TradeChargesService.java
+U    java/com/cs/examin/calculations/util/ChargeCalculator.java
+U    java/com/cs/examin/calculations/util/TransactionUtility.java
+U    java/com/cs/examin/calculations/util/transactionpopulator/AbstractTransactionPopulator.java
+U    java/com/cs/examin/calculations/util/transactionpopulator/FuturesTransactionPopulator.java
+U    java/com/cs/examin/calculations/util/transactionpopulator/TransactionPopulator.java
+U    java/com/cs/examin/calculations/util/TransactionChargeUtility.java
+A    java/com/cs/examin/gui/smartclient/datasource/TradeChargesDataSource.java
+A    java/com/cs/examin/common/processor
+A    java/com/cs/examin/common/processor/Processor.java
+A    java/com/cs/examin/common/processor/ProcessorInputOutput.java
+A    java/com/cs/examin/common/processor/ComplexProcessor.java
+A    java/com/cs/examin/common/processor/BasicProcessorIOValues.java
+A    java/com/cs/examin/common/processor/ProcessorException.java
+U    WebApp/smartclient/inc/common.inc
+A    WebApp/smartclient/datasource/tradeCharges.ds.xml
+U    WebApp/smartclient/js/transchargecontrols.js
+U    WebApp/smartclient/js/transchargelayout.js
+A    WebApp/smartclient/js/tradeCharges.js
+U    WebApp/smartclient/jsp/TransChargeEditFields.jsp
+
+--Build the ear
+cd /opt/excalibur/prototype/Source/scripts/ant/examin
+ant ear_only
+
+--login as oracle
+su - oracle
+--Copy the ears
+cp /opt/excalibur/prototype/builds/com.cs.examin.ear /opt/oracle/domains/examin/application/.
+cp /opt/excalibur/prototype/builds/com.cs.examin.ear /opt/oracle/domains/examin/servers/examin_batch1/stage/com/.
+
+--Stop the instance
+cd /opt/oracle/domains/examin/bin
+./stopExaminBatch1.sh
+
+--If does not stop properly, find the process and execute kill
+ps -ef | grep "examin_batch"
+
+--Start the instance
+./startExaminBatch1.sh
