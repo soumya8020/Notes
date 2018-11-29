@@ -1,0 +1,229 @@
+staged and processed (staging_state_cd) in transaction_charge
+
+ET
+
+TC
+
+TCS
+
+TJ->TLD (Accruals)
+
+TJ->JS (case1)
+JS->SA (case2)
+SA->GL (case3)
+
+if approved data goes to IAR
+
+----------------
+if automatch is not happening
+
+select * from TRANSACTION_LOCK_CONTROL;
+
+-----------------
+
+http://192.168.109.102:18217/examinWeb/DummyLogin.jsp
+--------------
+192.168.113.106  3308
+-------------
+
+select * from raw_source_data_mapping where record_active_ind='Y' and mapping_id=;
+
+select * from RAW_SOURCE_MAPPING_MASTER where record_active_ind='Y' and mapping_id=;
+
+select * from construct_wire where record_active_ind='Y' and mapping_id=;
+
+-----------------
+
+before running FX accruals---
+
+cd examin/bin/runnaccrualfx
+
+after two batch go to AAP journal summary and elc summary
+
+before month end -check business date 
+
+----------------------
+
+Case Management
+
+
+utils->XCB case management-> CM
+
+Projects=spaces(DB)
+
+1>global
+2>ops
+3>default--system ill automatically generate
+
+
+providing access to CM - there are 2 ways 
+1>through screen
+2>from database
+
+1>through database
+
+table- user_space_roles
+
+id  -  max(id)
+user_id  -  select * from user_reference ;  fetch last_col (id)
+space_id  -  select * from spaces; fetch id
+role_key  -  default (for ops users)
+
+
+2>utils->XCB case management-> CM->options->managespace->spacesize
+
+choose the space and add the user
+
+
+if they ask for categories and sub-categories-------
+
+select * from functions;
+
+select * from function_group_mapping;
+
+prod,function and party (party_reference)
+
+
+if mail not sent  -----
+
+user_reference;  (email id)
+
+
+how to create a ticket  ----
+
+utils->XCB case management ->Action
+
+
+-------------------
+if recalc not happnd check in examin_transaction   cal_eligible_ind and trans_charge_status
+Recalc
+
+cd examin/bin/groovy
+ls -ltr
+rm transids.txt
+vi transids.txt (paste all trans_ids which are to be recalc)
+../runGroovy.sh calc-client-non-eq
+
+after running dis check charge-calc-date(transaction_charge) which should be same as current_date(examin_business_date)
+
+----------
+
+Accruals
+
+cd examin/bin/adhoc
+ls -ltr
+vi accrual-pre-month.sh
+./accrual-pre-month.sh &
+
+check logs
+
+cd ../../..
+cd examin/logs
+ls -ltr
+tail -f (last accrual log)
+
+----------
+
+CaseRun
+
+
+Case 1:- ManualAccrual to Allocation
+
+AAP -> Allocation -> approve ->check for exception 
+*if exceptions are der-- select * from expense_line_summary where expense_line_id='';  //fetch dept_id
+select * from gdh where deptid='';
+update effective_value to 'A'
+
+Case 2:- Postings
+
+AAp->postings
+
+Case 3:- TLD Posting
+
+examin/bin/adhoc
+ls -ltr
+cd 'product_type'
+ls -ltr
+vi 'file_name';  //for which date we have to run
+vi 'file_name.sh'
+
+----------------------
+
+Adding attribute name after selecting dat what all value should it show in drop-down
+
+
+select * from examin_static_reference where token_value like '%instrument%';
+
+select * from option_reference;
+
+-------------
+
+Adding buttons
+
+select *from user_reference where user_id='' ;    ---fetch gid
+
+select * from usergroup_role_profile where gid='';  --fetch usergroup_role_id
+
+select * from role_reference;        --fetch role_id
+
+select * from menu_reference where parent_name='';   ----fetch menu_group_id
+
+select * from usergroup_role_profile where usergroup_role_id='' and entity_intrnl_id='';
+
+-------------------------------------------
+ 
+
+Adding elements in Drop down
+
+select * from examin_static_reference where token_type=? and token_subtype=?;  ---from screen
+
+insert statements
+
+---------------------------------
+
+
+
+  
+  "tokenType":"GUI", 
+                "tokenSubType":"SourceCodeMapping", 
+                "tokenColumnName":"ExpansionType", 
+                "productTypeCode":"EQ", 
+                "productSubTypeCode":"CASH"
+                                                    
+                                                    
+select * from EXAMIN_STATIC_REFERENCE where token_type='GUI' and token_sub_type='SourceCodeMapping' and token_column_name = 'ExpansionType';
+
+
+SELECT DISTINCT expansion_type,
+  expansion_type_id
+FROM expansion_type_reference
+WHERE source_id =
+  (SELECT source_id
+  FROM external_source_reference
+  WHERE source_name = 'AGORA-EU'
+  AND source_type   = 'Reference'
+  )
+AND upper(expansion_type) LIKE '%%'
+ORDER BY expansion_type
+
+
+
+SELECT DISTINCT * FROM expansion_type_reference where source_id = 380
+--380
+
+--Insert into EXPORT_TABLE (EXPANSION_TYPE_ID,EXPANSION_TYPE,SOURCE_ID,UPDATE_DATETIME,UPDATE_USER_ID,RECORD_ACTIVE_IND,RECORD_STATUS,VERIFY_COMMENTS,VERIFY_DATETIME,VERIFY_USER_ID,ADD_DATETIME,ADD_USER_ID) values (43,'OUSER',380,null,null,'Y',null,null,null,null,to_date('29-10-13','DD-MM-RR'),'smadnurk');
+
+
+
+
+
+Insert into EXAMIN_STATIC_REFERENCE (TOKEN_ID,TOKEN_TYPE,TOKEN_SUB_TYPE,TOKEN_TABLE_NAME,TOKEN_COLUMN_NAME,PRODUCT_TYPE_CODE,PRODUCT_SUB_TYPE_CODE,CHARGE_TYPE_CODE,CHARGE_SUB_TYPE_CODE,TOKEN_VALUE,TARGET_TOKEN_NAME,TOKEN_VALUE_SHORT_NAME,ADD_DATETIME,ADD_USER_ID,UPDATE_DATETIME,UPDATE_USER_ID,TARGET_TOKEN) 
+values (110771,'GUI','SourceCodeMapping',null,'ExpansionType',null,null,null,null,null,null,null,sysdate,'pramesh',null,null,'select distinct expansion_type, expansion_type_id from expansion_type_reference where source_id = (select source_id from external_source_reference where source_name = ? and source_type = ''Reference'') and upper(expansion_type) like ? order by expansion_type');
+
+
+
+Insert into EXAMIN_STATIC_REFERENCE (TOKEN_ID,TOKEN_TYPE,TOKEN_SUB_TYPE,TOKEN_TABLE_NAME,TOKEN_COLUMN_NAME,PRODUCT_TYPE_CODE,PRODUCT_SUB_TYPE_CODE,CHARGE_TYPE_CODE,CHARGE_SUB_TYPE_CODE,TOKEN_VALUE,TARGET_TOKEN_NAME,TOKEN_VALUE_SHORT_NAME,ADD_DATETIME,ADD_USER_ID,UPDATE_DATETIME,UPDATE_USER_ID,TARGET_TOKEN) 
+values (110771,null,'SourceCodeMapping',null,'ExpansionType',null,null,null,null,null,null,null,sysdate,'pramesh',null,null,'select distinct expansion_type, expansion_type_id from expansion_type_reference where source_id = (select source_id from external_source_reference where source_name = ? and source_type = ''Reference'') and upper(expansion_type) like ? order by expansion_type');
+
+
+select * from option_reference where option_code like 'D%';

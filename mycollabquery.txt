@@ -1,0 +1,15 @@
+select CONCAT(prj.name , '-', task.id) as Identifier, task.name as detail, mile.name as phase,
+task.priority, task.startDate, task.endDate,(task.endDate-task.startDate) as duration, prj.name, task.description, task.assignUser, 
+task.status as task_status, task.createdUser as Created_by 
+from ems.m_prj_task task , ems.m_prj_project prj, ems.m_prj_milestone mile
+ where task.projectId = prj.id and task.projectId=28
+ and task.milestoneId=mile.id
+union
+select CONCAT(prj.name , '-', task.id) as Identifier, task.name as detail,mile.name as phase, 
+task.priority, task.startDate, task.endDate,(task.endDate-task.startDate) as duration, prj.name, task.description, task.assignUser, 
+task.status as task_status, task.createdUser as Created_by 
+from ems.m_tracker_bug task , ems.m_prj_project prj , ems.m_prj_milestone mile
+where 
+task.projectId = prj.id and task.projectId=28
+and task.milestoneId=mile.id
+;
